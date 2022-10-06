@@ -21,6 +21,7 @@ repos:
           .*\.Rproj|
           .*\.sh|
           .*\.xlsx|
+          .*\.csv|
           (.*/|)\.gitignore|
           (.*/|)\.gitlab-ci\.yml|
           (.*/|)\.lintr|

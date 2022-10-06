@@ -5,7 +5,7 @@
 \alias{lby_districts}
 \title{Libyan Districts}
 \format{
-An object of class \code{data.frame} with 22 rows and 4 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 24 rows and 4 columns.
 }
 \source{
 \url{reach}

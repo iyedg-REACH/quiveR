@@ -1,64 +1,62 @@
 library(dplyr)
 library(magrittr)
 library(here)
-library(openxlsx)
+library(readr)
 
-admin_codes_path <- here("data-raw/lby_pcodes_kobo.xlsx")
-admin_codes_wb <- loadWorkbook(admin_codes_path)
+admin_codes <- read_csv("data-raw/lby_pcodes_kobo.csv", show_col_types = FALSE) %>%
+  janitor::clean_names()
 
 ######### Regions
-lby_regions <- readWorkbook(admin_codes_wb, sheet = "admin1") %>%
-  janitor::clean_names() %>%
+lby_regions <- admin_codes %>%
+  filter(list_name == "Region") %>%
   rename(
-    region_id = adm1_geo_2,
-    region_name_en = adm1_geodi,
-    region_name_ar = adm1_geo_1
+    region_id = name,
+    region_name_en = label_english,
+    region_name_ar = label_arabic
   ) %>%
   mutate(
-    region_id = stringr::str_replace(region_id, "LY", "LBY"),
     across(.fns = stringr::str_squish)
-  )
+  ) %>%
+  janitor::remove_empty(which = "cols") %>%
+  select(-list_name)
 
 usethis::use_data(lby_regions, overwrite = TRUE)
 
 
 ######### Districts
-lby_districts <- readWorkbook(admin_codes_wb, sheet = "admin2") %>%
-  janitor::clean_names() %>%
+lby_districts <- admin_codes %>%
+  filter(list_name == "District") %>%
   rename(
-    region_id = adm1_pcode,
-    district_id = adm2_pcode,
-    district_name_en = adm2_name_en,
-    district_name_ar = adm2_name_ar
+    region_id = region,
+    district_id = name,
+    district_name_en = label_english,
+    district_name_ar = label_arabic
   ) %>%
   mutate(
-    region_id = stringr::str_replace(region_id, "LY", "LBY"),
-    district_id = stringr::str_replace(district_id, "LY", "LBY"),
     across(.fns = stringr::str_squish)
   ) %>%
-  select(-contains("adm1")) %>%
-  relocate(region_id, .before = district_id)
+  janitor::remove_empty(which = "cols") %>%
+  relocate(region_id, .before = district_id) %>%
+  select(-list_name)
 
 usethis::use_data(lby_districts, overwrite = TRUE)
 
 ######### Municipalities
-lby_municipalities <- readWorkbook(admin_codes_wb, sheet = "admin3") %>%
-  janitor::clean_names() %>%
+lby_municipalities <- admin_codes %>%
+  filter(list_name == "Municipality") %>%
   rename(
-    region_id = adm1_geo_2,
-    district_id = adm2_pcode,
-    municipality_id = adm3_pcode,
-    municipality_name_en = adm3_name_en,
-    municipality_name_ar = adm3_name_ar
+    region_id = region,
+    district_id = district,
+    municipality_id = name,
+    municipality_name_en = label_english,
+    municipality_name_ar = label_arabic
   ) %>%
   mutate(
-    region_id = stringr::str_replace(region_id, "LY", "LBY"),
-    district_id = stringr::str_replace(district_id, "LY", "LBY"),
-    municipality_id = stringr::str_replace(municipality_id, "LY", "LBY"),
     across(.fns = stringr::str_squish)
   ) %>%
-  select(-contains("adm1"), -contains("adm2")) %>%
+  janitor::remove_empty(which = "cols") %>%
   relocate(district_id, .before = municipality_id) %>%
-  relocate(region_id, .before = district_id)
+  relocate(region_id, .before = district_id) %>%
+  select(-list_name)
 
 usethis::use_data(lby_municipalities, overwrite = TRUE)
