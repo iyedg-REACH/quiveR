@@ -12,6 +12,7 @@ httr
 Iyed
 iyedg
 KoBo
+KoBoToolbox
 LazyData
 magrittr
 MERCHANTABILITY
@@ -28,6 +29,7 @@ styler
 sublicense
 testthat
 tibble
+tidyjson
 tidyr
 usethis
 UUID

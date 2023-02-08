@@ -38,6 +38,9 @@ kobo_download_dataset(
 
 \item{max_retries}{The number of retries when downloading}
 }
+\value{
+file path
+}
 \description{
 Download survey responses as a dataset
 }

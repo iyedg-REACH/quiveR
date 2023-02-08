@@ -10,7 +10,7 @@
 #' @param file_path The file path to which the dataset is saved
 #' @param max_retries The number of retries when downloading
 #'
-#' @return NULL
+#' @return file path
 #' @export
 kobo_download_dataset <- function(server_url = "https://kobo.humanitarianresponse.info",
                                   type = "xls",
@@ -73,4 +73,43 @@ kobo_download_dataset <- function(server_url = "https://kobo.humanitarianrespons
     httr2::req_perform(path = file_path)
   assertthat::assert_that(resp$status == 200)
   cli::cli_alert_success(glue::glue("Dataset downloaded successfuly to {file_path}"))
+  return(file_path)
+}
+
+
+#' Retrieve a KoBoToolbox token for the V2 API
+#'
+#' @param username KoBo username
+#' @param password KoBo password
+#'
+#' @return token as a character vector
+#' @export
+kobo_token <- function(username, password) {
+  httr2::request("https://kobo.humanitarianresponse.info/token/?format=json") |>
+    httr2::req_auth_basic(username, password) |>
+    httr2::req_error(body = function(resp) {
+      httr2::resp_body_json(resp)$detail
+    }) |>
+    httr2::req_perform() |>
+    httr2::resp_body_json()
+}
+
+
+#' Retrieve a list of KoBoToolbox Assets
+#'
+#' @param token KoBo Token
+#'
+#' @return data frame
+#' @export
+kobo_assets <- function(token) {
+  httr2::request("https://kobo.humanitarianresponse.info/api/v2/assets.json") |>
+    httr2::req_headers(Authorization = paste("Token", token)) |>
+    httr2::req_error(body = function(resp) {
+      httr2::resp_body_json(resp)$detail
+    }) |>
+    httr2::req_perform() |>
+    httr2::resp_body_string() |>
+    tidyjson::enter_object("results") |>
+    tidyjson::gather_array() |>
+    tidyjson::spread_all()
 }
